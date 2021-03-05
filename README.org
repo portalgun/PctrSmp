@@ -1,0 +1,63 @@
+* PctrSmp
+
+Quickly sample as many patch centers as possible, with or without overlap between patches, from a stereo-image.
+
+** Conventions
+#+begin_src 
+k or K                                  LorR.
+                                             k=1 -> L
+                                             k=2 -> R
+nK                                      Opposite of LorR
+                                             if k==1, nK=2
+                                             if k==2, nK=1
+cells                                   Group things into LandR
+                                            eg = IctrIndl{1} -> IctrIndl for L
+fname
+                                            eg = IctrIndl{2} -> IctrIndl for R
+#+end_src
+
+** Constructor
+NOTE: Constructor does not run sampling -> use obj.run (see: help PctrSmp.run
+#+begin_src
+obj=PctrSmp(IszRC,PszRC, overlapPixRC, cpLookup, bCPoverlap, maxNptch, rndSd)
+*** IN
+#+begin_src 
+IszRC               int  [1x2]          Image size by rows and columns
+PszRC               int  [1x2]          Minimum distance to seperate sample centers by pixel rows and columns
+maxNptch            int  [1x1]          Max number of samples to be taken [1 x 1]
+overlapPixRC        int  [1x2]          Number of pixels patches are allowed to overlap vertically [1 x 2]
+
+cpLookup      {2x1} num  [nPtch x 2]    Corresponding points, formatted s.t. indices of each cell corresponds to anchoring CP.
+                                        Input an index
+                                        For example, assuming a 10x10 image:
+                                            indeces 1,1 in {1}(1,:) corresponds to L anchor at pixel index 1 (or subscript [1,1]
+                                                           {1}(1,:) contains R CP (in subscripts) for that anchor point
+                                            indeces 1,1 in {2}(1,:) corresponds to R anchor at pixel index 1 (or subscript [1,1]
+                                                           {2}(1,:) contains L CP (in subscripts) for that anchor point
+                                            indeces 1,1 in {1}(50,:) corresponds to L anchor at pixel index 50 (or subscript [10,5]
+                                                           {1}(1,:) contains R CP (in subscripts) for that anchor point
+
+                                            {2}(1,:) corresponds to R anchor index 1 (or subscript [1,1]
+bCPoverlap          bool [1x1]          Whether sampled corresponding patch (eg R) of an anchor patch (L) can overlap with anchored patches when anchor is switched (R)
+rndSd               int  [1x1]          Random seed for sampling.
+                                        0 -> non-random sampling that maximizes number of samples
+#+end_src
+*** OUT:
+#+begin_src
+IctrIndl      {2x1} int [nPtch x 1]     Indeces sampled for all images
+ount
+#+end_src
+** RUN:
+#+begin_src
+function obj=run(obj,PctrInd,PctrIndPre,K,cpLookup)
+OPTIONAL IN:
+     PctrInd    - Indeces of possible potential sample centers points {2 x 1}[N x 1]
+                       i.e. map of regions that are ok to sample from
+     PctrIndPre - Indeces of pre-ampled centers points {2 x 1}[N x 1]
+                       Marked as invalid sampling regions according to overlap rules, but not included in final list of samples
+     K          - which anchor to start with [1x1] defaults to 1 if no sampling has been done, otherwise defaults to 1 if 2 was ran last, and 2 if 1.
+                       1 => L
+                       2 => R
+     cpLookup   - see constructor help
+#+end_src
+    
